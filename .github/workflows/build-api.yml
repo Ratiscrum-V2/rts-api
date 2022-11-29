@@ -45,6 +45,8 @@ jobs:
       contents: read
       packages: write
 
+    needs: build
+
     steps:
       - name: Deploy API
         uses: appleboy/ssh-action@master
