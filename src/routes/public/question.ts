@@ -14,5 +14,4 @@ router.route("/question/:questionId")
     .get(getQuestion)
     .all(MethodNotAllowed);
 
-
 export default router;
