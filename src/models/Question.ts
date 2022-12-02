@@ -18,6 +18,8 @@ export function init(sequelize: Sequelize): void {
 			id: {
 				type: DataTypes.NUMBER,
 				allowNull: false,
+				primaryKey: true,
+				autoIncrement: true
 			},
 			title: {
 				type: DataTypes.STRING,
