@@ -7,9 +7,8 @@ import NoIdProvidedError from "../../types/errors/NoIdProvidedError";
 export async function LoadFileMetadata(request: Request, response: Response, next: NextFunction) {
 
 	const fileId = parseInt(request.params?.fileId);
-	const fileTempId = request.params?.fileTempId;
 
-	if(!fileId && !fileTempId) {
+	if(!fileId) {
 		next({ message: "No id provided", code: 400, name: "NoIdProvidedError" } as NoIdProvidedError);
 		return;
 	}
@@ -18,13 +17,6 @@ export async function LoadFileMetadata(request: Request, response: Response, nex
 	
 	if(fileId) {
 		fileMetadata = await FileMetadata.findByPk(fileId);
-	} 
-	else if(fileTempId) {
-		fileMetadata = await FileMetadata.findOne({
-			where: {
-				tempFileId: fileTempId
-			}
-		});
 	}
 
 	if(!fileMetadata) {

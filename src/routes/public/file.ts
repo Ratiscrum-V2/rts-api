@@ -5,7 +5,7 @@ import MethodNotAllowed from "../../middlewares/MethodNotAllowed";
 
 const router = Router();
 
-router.route("/files/:fileTempId")
+router.route("/files/:fileId")
 	.all(LoadFileMetadata)
 	.get(getFile)
 	.all(MethodNotAllowed);
