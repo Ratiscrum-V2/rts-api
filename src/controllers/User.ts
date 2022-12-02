@@ -113,6 +113,11 @@ export async function login(
     return;
   }
 
+  if(existingUser.TWOFASecret) {
+	response.json({ message: "Please enter 2FA code" });
+	return;
+  }
+
   const session = encodeSession({
     id: existingUser.id,
     username: existingUser.nickname,
@@ -153,4 +158,46 @@ export async function verifyTwoFactorAuth(request: Request, response: Response, 
 	}
 
 	response.json({ message: "Valid token" })
+}
+
+export async function logWithToken(request: Request, response: Response, next: NextFunction) {
+	if(request.body.email !== undefined) {
+		next({ code: 400, message: "Missing mail", name: "InvalidBodyError"  } as InvalidBodyError);
+		return;
+	}
+
+	if(request.body.token !== undefined) {
+		next({ code: 400, message: "Missing token", name: "InvalidBodyError"  } as InvalidBodyError);
+		return;
+	}
+
+	const existingUser = await User.findOne({
+		where: {
+		  email: request.body.email,
+		},
+	  });
+	
+	if (!existingUser) {
+		next({
+			message: "Inexistant user",
+			code: 404,
+			name: "InexistantResourceError",
+		} as InexistantResourceError);
+		return;
+	}
+	
+
+	if(!validate2FA(existingUser, request.body.token)) {
+		response.json({ message: "Invalid token" });
+	}
+
+	const session = encodeSession({
+		id: existingUser.id,
+		username: existingUser.nickname,
+		dateCreated: Date.now(),
+	  });
+
+	response
+		.status(200)
+		.json({ message: "Logged in", session, email: existingUser.email });
 }
