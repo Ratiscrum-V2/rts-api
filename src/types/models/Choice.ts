@@ -6,6 +6,7 @@ export type ChoiceAttributes = {
   label: string;
   value: string;
   effects: StringEnumObject;
+  questionId: number;
 };
 
 export type ChoiceInput = ChoiceAttributes;
@@ -18,6 +19,7 @@ export function isChoiceAttributes(
   return (
     (object as ChoiceAttributes).label !== undefined &&
     (object as ChoiceAttributes).value !== undefined &&
+    (object as ChoiceAttributes).questionId !== undefined &&
     (object as ChoiceAttributes).effects !== undefined
   );
 }

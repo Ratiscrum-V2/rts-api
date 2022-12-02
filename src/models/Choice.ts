@@ -9,6 +9,7 @@ export class Choice
     declare label: string;
     declare value: string;
     declare effects: StringEnumObject;
+    declare questionId: number;
 }
 
 export function init(sequelize: Sequelize): void {
@@ -24,6 +25,10 @@ export function init(sequelize: Sequelize): void {
       },
       effects: {
         type: DataTypes.JSON,
+        allowNull: false,
+      },
+      questionId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
     },
