@@ -15,6 +15,10 @@ export class Question
 export function init(sequelize: Sequelize): void {
 	Question.init(
 		{
+			id: {
+				type: DataTypes.NUMBER,
+				allowNull: false,
+			},
 			title: {
 				type: DataTypes.STRING,
 				allowNull: false,

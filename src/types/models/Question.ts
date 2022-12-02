@@ -2,6 +2,7 @@ import { CommonAttributes, isCommonAttributes } from "./Common";
 
 // types
 export type QuestionAttributes = {
+  id: number;
   title: string;
   description?: string;
   medias: number[];

@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { ValidationError } from "sequelize";
+import { Choice } from "../models/Choice";
 import { Question } from "../models/Question";
 import InvalidBodyError from "../types/errors/InvalidBodyError";
 import { isQuestionInput, QuestionInput } from "../types/models/Question";
+import { getRandomInt } from "../utils/Number";
 
 export async function createQuestion(request: Request, response: Response, next: NextFunction): Promise<void> 
 {
@@ -26,7 +28,28 @@ export async function createQuestion(request: Request, response: Response, next:
 
 export async function getQuestion(request: Request, response: Response, next: NextFunction): Promise<void> 
 {
+  const choices = await Choice.findAll({
+    where:{
+      questionId: response.locals.question.id
+    }
+  })
+
+  response.locals.question.choices = choices;
+  
   response.json(response.locals.question);
+}
+
+export async function getRandomQuestion(request: Request, response: Response, next: NextFunction) {
+  
+  const questionLength = await Question.count();
+
+  const question = await Question.findOne({
+    where: {
+      id: getRandomInt(questionLength)
+    }
+  });
+
+  response.json(question);
 }
 
 export async function updateQuestion(request: Request, response: Response, next: NextFunction): Promise<void> 

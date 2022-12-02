@@ -1,8 +1,8 @@
-interface StringEnumObject {
+export interface StringEnumObject {
 	[enumValue: string]: string
 }
 
-interface NumberEnumObject {
+export interface NumberEnumObject {
 	[enumValue: number]: string
 }
 
