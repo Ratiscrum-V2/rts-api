@@ -15,6 +15,10 @@ export default class FileManagement {
 			throw new Error("No S3 credentials provided");
 		}
 
+		if(!process.env.S3_BUCKETNAME) {
+			throw new Error("No S3_BUCKETNAME provided");
+		}
+
 		if(!process.env.S3_ENDPOINT) {
 			throw new Error("No endpoint provided");
 		}
@@ -30,6 +34,8 @@ export default class FileManagement {
 		});
 
 		Loggers.getLogger("S3").info("S3 connected");
+
+		this.createBucketIfNotExist(process.env.S3_BUCKETNAME);
 	}
 
 	public static get(): FileManagement {

@@ -7,31 +7,22 @@ import { Readable } from "stream";
 import FileManagement from "../core/FileManagement";
 import { FileMetadata } from "../models/FileMetadata";
 import InvalidBodyError from "../types/errors/InvalidBodyError";
-import { FileMetadataInput, isFileMetadataInput } from "../types/models/File";
-import { GenericObjectWithStrings } from "../types/utils/Object";
-import { generateTempFileId, getBucketPrefix, slugify } from "../utils/File";
-
+import { isFileMetadataInput } from "../types/models/File";
 
 export async function uploadFile(request: Request, response: Response, next: NextFunction) {
 	const file = request.files?.file;
 
 	if(Array.isArray(file) || file === undefined)
 		return next({ message: "Only one file at the time", code: 400, name: "InvalidBodyError" } as InvalidBodyError);
-
-	const metadata: FileMetadataInput = {
-		mimeType: file.mimetype,
-		tempFileId: "",
-		...request.body
-	};
 	
-	if(!isFileMetadataInput(metadata))
+	if(!isFileMetadataInput(request.body))
 		return next({ message: "Invalid body error", code: 400, name: "InvalidBodyError" } as InvalidBodyError);
 	
-	let fileMetadata;
+	let fileMetadata: FileMetadata;
 
 	try {
-		fileMetadata = await FileMetadata.create(metadata);
-	}
+		fileMetadata = await FileMetadata.create(request.body);
+	} 
 	catch(error) {
 		if(error instanceof ValidationError)
 			return next({ message: error.message, code: 400, name: "InvalidBodyError" } as InvalidBodyError);
@@ -39,42 +30,34 @@ export async function uploadFile(request: Request, response: Response, next: Nex
 		return next(error);
 	}
 
-	const bucketPrefix = getBucketPrefix();
+	if(!process.env.S3_BUCKETNAME) {
+		throw new Error("No S3_BUCKETNAME provided");
+	}
 
 	try {
-		await FileManagement.get().uploadFile(fileMetadata, `${bucketPrefix}`, file.data);
+		await FileManagement.get().uploadFile(fileMetadata, process.env.S3_BUCKETNAME, file.data);
 	}
 	catch(error) {
 		return next(error);
 	}
 
-	const tempFileId = await generateTempFileId(fileMetadata.id);
-
-	if(tempFileId)
-		fileMetadata.tempFileId = tempFileId;
-
 	response.json(fileMetadata);
 }
 
 export async function getFileMetadata(request: Request, response: Response) {
-	const metadata = response.locals.fileMetadata;
-
-	const tempFileId = await generateTempFileId(metadata.id);
-
-	if(tempFileId)
-		metadata.tempFileId = tempFileId;
-
-	response.json(metadata);
+	response.json(response.locals.fileMetadata);
 }
 
 export async function getFile(request: Request, response: Response, next: NextFunction) {
 	const metadata: FileMetadata = response.locals.fileMetadata;
 
-	const bucketPrefix = getBucketPrefix();
+	if(!process.env.S3_BUCKETNAME) {
+		throw new Error("No S3_BUCKETNAME provided");
+	}
 
 	let res: PromiseResult<S3.GetObjectOutput, AWSError>;
 	try {
-		res = await FileManagement.get().getFile(metadata.id.toString(), `${bucketPrefix}`);
+		res = await FileManagement.get().getFile(metadata.id.toString(), process.env.S3_BUCKETNAME);
 	}
 	catch(error) {
 		return next(error);
@@ -111,42 +94,9 @@ export async function getFile(request: Request, response: Response, next: NextFu
 	response.status(200).send(fileData);
 }
 
-export async function getTripFiles(request: Request, response: Response) {
-
-	const whereQueryObject: GenericObjectWithStrings = {
-		tripId: response.locals.trip.id
-	};
-
-	if(request.query.type) 
-		whereQueryObject.fileType = request.query.type as string;
-	if(request.query.step) 
-		whereQueryObject.stepId = request.query.step as string;
-	if(request.query.path) 
-		whereQueryObject.pathId = request.query.path as string;
-	if(request.query.point) 
-		whereQueryObject.pointId = request.query.point as string;
-
-	const metadatas = await FileMetadata.findAll({
-		where: whereQueryObject
-	});
-
-	for(let i = 0; i < metadatas.length; i++) {
-		const tempFileId = await generateTempFileId(metadatas[i].id);
-
-		if(tempFileId)
-			metadatas[i].tempFileId = tempFileId;	
-	}
-
-	response.json(metadatas);
-}
-
 export async function updateMetadata(request: Request, response: Response, next: NextFunction) {
 	const metadata: FileMetadata = response.locals.fileMetadata;
 	const newAttributes: Partial<FileMetadata> = request.body;
-
-	if(newAttributes.visibility) {
-		newAttributes.tempFileId = "";
-	}
 
 	let meta;
 	try {
@@ -159,19 +109,17 @@ export async function updateMetadata(request: Request, response: Response, next:
 		return next(error);
 	}
 
-	const tempFileId = await generateTempFileId(meta.id);
-
-	if(tempFileId)
-		meta.tempFileId = tempFileId;
-
 	response.json(meta);
 }
 
 export async function deleteFile(request: Request, response: Response) {
 	const metadata: FileMetadata = response.locals.fileMetadata;
-	const bucketPrefix = getBucketPrefix();
 	
-	await FileManagement.get().deleteFile(metadata.id.toString(), `${bucketPrefix}`);
+	if(!process.env.S3_BUCKETNAME) {
+		throw new Error("No S3_BUCKETNAME provided");
+	}
+
+	await FileManagement.get().deleteFile(metadata.id.toString(), process.env.S3_BUCKETNAME);
 
 	await metadata.destroy();
 
