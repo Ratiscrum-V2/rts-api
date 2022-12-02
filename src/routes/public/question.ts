@@ -10,7 +10,7 @@ router.route("/question/:questionId")
     .get(getQuestion)
     .all(MethodNotAllowed);
 
-router.route("/question/random")
+router.route("/questionrnd")
     .get(getRandomQuestion)
     .all(MethodNotAllowed);
 
