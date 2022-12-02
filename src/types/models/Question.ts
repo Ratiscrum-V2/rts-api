@@ -8,7 +8,7 @@ export type QuestionAttributes = {
   medias: number[];
 };
 
-export type QuestionInput = QuestionAttributes;
+export type QuestionInput = Omit<QuestionAttributes, "id">;
 export type QuestionOutput = QuestionAttributes & CommonAttributes;
 
 // type predicates
