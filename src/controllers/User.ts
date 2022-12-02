@@ -12,6 +12,8 @@ import {
 } from "../types/utils/Credentials";
 import Hash from "../utils/Hash";
 import { encodeSession } from "../utils/Token";
+import { generateSecret } from "node-2fa";
+import { validate2FA } from "../utils/Session";
 
 export async function register(
   request: Request,
@@ -130,4 +132,25 @@ export async function me(request: Request, response: Response) {
   });
 
   response.json(user);
+}
+
+export async function enableTwoFactorAuth(request: Request, response: Response) {
+
+	const newSecret = generateSecret({ account: response.locals.user.nickname, name: "Ratisexe" });
+
+	response.locals.user.update({ TWOFASecret: newSecret.secret });
+
+	response.json(newSecret);
+}
+
+export async function verifyTwoFactorAuth(request: Request, response: Response, next: NextFunction) {
+	if(!request.body.token) {	
+		return next({ code: 400, message: "Missing token", name: "InvalidBodyError" } as InvalidBodyError);
+	}
+
+	if(!validate2FA(response.locals.user, request.body.token)) {
+		response.json({ message: "Invalid token" })
+	}
+
+	response.json({ message: "Valid token" })
 }

@@ -5,7 +5,7 @@ export type UserAttributes = {
   email: string;
   nickname: string;
   hashedPassword: string;
-  TWOFAtoken?: string;
+  TWOFASecret?: string;
 };
 
 export type UserInput = UserAttributes;
