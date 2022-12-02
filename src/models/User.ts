@@ -2,13 +2,13 @@ import { DataTypes, Model, Sequelize } from "sequelize";
 import { UserAttributes, UserInput } from "../types/models/User";
 
 export class User
-  extends Model<UserInput, UserInput>
+  extends Model<UserAttributes, UserInput>
   implements UserAttributes
 {
   declare id: number;
   declare email: string;
   declare nickname: string;
-  declare TWOFAtoken?: string;
+  declare TWOFASecret?: string;
   declare hashedPassword: string;
 }
 
@@ -33,7 +33,7 @@ export function init(sequelize: Sequelize): void {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      TWOFAtoken: {
+      TWOFASecret: {
         type: DataTypes.STRING,
         allowNull: true,
       },
