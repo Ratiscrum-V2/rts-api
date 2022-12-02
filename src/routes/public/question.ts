@@ -5,13 +5,14 @@ import MethodNotAllowed from "../../middlewares/MethodNotAllowed";
 
 const router = Router();
 
-router.route("/question/random")
-    .get(getRandomQuestion)
-    .all(MethodNotAllowed);
-
 router.route("/question/:questionId")
     .all(LoadQuestion)
     .get(getQuestion)
     .all(MethodNotAllowed);
+
+router.route("/question/random")
+    .get(getRandomQuestion)
+    .all(MethodNotAllowed);
+
 
 export default router;
