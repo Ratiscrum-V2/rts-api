@@ -1,5 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 import { UserAttributes, UserInput } from "../types/models/User";
+import { Comment } from "./Comment";
 
 export class User
   extends Model<UserAttributes, UserInput>
@@ -45,4 +46,10 @@ export function init(sequelize: Sequelize): void {
   );
 }
 
-export function associate(): void {}
+export function associate(): void {
+  User.hasMany(Comment, {
+    sourceKey: "id",
+    foreignKey: "authorId",
+    onDelete: "cascade"
+  });
+}

@@ -17,7 +17,7 @@ export async function createComment(request: Request, response: Response, next: 
     if (error instanceof ValidationError)
       return next({ message: error.message, code: 400, name: "InvalidBodyError" } as InvalidBodyError);
     
-      return next(error);
+    return next(error);
   }
 
   response.json(comment);

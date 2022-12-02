@@ -9,6 +9,8 @@ export class Comment
   declare title: string;
   declare message: string;
   declare verified: boolean;
+
+  declare questionId: number;
 }
 
 export function init(sequelize: Sequelize): void {
