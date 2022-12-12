@@ -16,7 +16,7 @@ export function init(sequelize: Sequelize): void {
 	Question.init(
 		{
 			id: {
-				type: DataTypes.NUMBER,
+				type: DataTypes.INTEGER,
 				allowNull: false,
 				primaryKey: true,
 				autoIncrement: true
